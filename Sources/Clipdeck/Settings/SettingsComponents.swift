@@ -85,8 +85,8 @@ struct PanelButtonStyle: ButtonStyle {
         return isDestructive ? AnyShapeStyle(.red) : AnyShapeStyle(.primary)
     }
 
-    private var background: Color {
-        if isProminent { return isDestructive ? .red : .accentColor }
-        return .primary.opacity(0.09)
+    private var background: AnyShapeStyle {
+        if isProminent { return isDestructive ? AnyShapeStyle(.red) : AnyShapeStyle(.tint) }
+        return AnyShapeStyle(.primary.opacity(0.09))
     }
 }

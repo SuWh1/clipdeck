@@ -135,6 +135,48 @@ struct PreferencesTests {
         }
     }
 
+    @Test("should start with the system look and full glass")
+    func appearanceDefaults() {
+        withPreferences { preferences, _ in
+        #expect(preferences.appearance == .system)
+        #expect(preferences.theme == .system)
+        #expect(preferences.glass == 1)
+        }
+    }
+
+    @Test("should remember the appearance, accent and glass level")
+    func appearanceRoundTrip() {
+        withPreferences { preferences, defaults in
+        preferences.appearance = .dark
+        preferences.theme = .graphite
+        preferences.glass = 0.4
+        let reread = Preferences(defaults: defaults)
+        #expect(reread.appearance == .dark)
+        #expect(reread.theme == .graphite)
+        #expect(reread.glass == 0.4)
+        }
+    }
+
+    @Test("should keep the glass level between solid and clear")
+    func glassClamped() {
+        withPreferences { preferences, defaults in
+        preferences.glass = 3
+        #expect(preferences.glass == 1)
+        defaults.set(-2.0, forKey: "glass")
+        #expect(preferences.glass == 0)
+        }
+    }
+
+    @Test("should fall back to the system look when the saved one is unknown")
+    func unknownAppearance() {
+        withPreferences { preferences, defaults in
+        defaults.set("neon", forKey: "appearance")
+        defaults.set("neon", forKey: "theme")
+        #expect(preferences.appearance == .system)
+        #expect(preferences.theme == .system)
+        }
+    }
+
     @Test("should fall back to one month when the saved retention is unknown")
     func unknownRetention() {
         withPreferences { preferences, defaults in

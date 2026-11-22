@@ -40,6 +40,8 @@ struct PanelRootView: View {
         }
         .animation(.easeOut(duration: 0.2), value: router.page)
         .background(WindowDragArea(onDrag: actions.panelMoved))
+        .background(Color(nsColor: .windowBackgroundColor).opacity(1 - settings.glass))
+        .tint(settings.theme.color)
     }
 
     private func transition(from edge: Edge) -> AnyTransition {

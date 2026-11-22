@@ -17,6 +17,9 @@ public final class Preferences {
         static let hasLaunchedBefore = "hasLaunchedBefore"
         static let panelX = "panelX"
         static let panelTop = "panelTop"
+        static let appearance = "appearance"
+        static let theme = "theme"
+        static let glass = "glass"
     }
 
     private let defaults: UserDefaults
@@ -78,6 +81,21 @@ public final class Preferences {
                 defaults.removeObject(forKey: Key.panelTop)
             }
         }
+    }
+
+    public var appearance: PanelAppearance {
+        get { defaults.string(forKey: Key.appearance).flatMap(PanelAppearance.init(rawValue:)) ?? .system }
+        set { defaults.set(newValue.rawValue, forKey: Key.appearance) }
+    }
+
+    public var theme: PanelTheme {
+        get { defaults.string(forKey: Key.theme).flatMap(PanelTheme.init(rawValue:)) ?? .system }
+        set { defaults.set(newValue.rawValue, forKey: Key.theme) }
+    }
+
+    public var glass: Double {
+        get { (defaults.object(forKey: Key.glass) as? Double).map { min(max($0, 0), 1) } ?? 1 }
+        set { defaults.set(min(max(newValue, 0), 1), forKey: Key.glass) }
     }
 
     public var hasLaunchedBefore: Bool {

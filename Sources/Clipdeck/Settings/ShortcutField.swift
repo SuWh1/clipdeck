@@ -28,17 +28,17 @@ struct ShortcutField: View {
             Button(action: toggleRecording) {
                 Text(isRecording ? hint ?? "Type keys…" : shortcut.displayString)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(isRecording ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.primary))
+                    .foregroundStyle(isRecording ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
                     .padding(.horizontal, 10)
                     .frame(minWidth: 80)
                     .frame(height: 24)
                     .background(
                         RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .fill(isRecording ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.09))
+                            .fill(isRecording ? AnyShapeStyle(TintShapeStyle().opacity(0.15)) : AnyShapeStyle(.primary.opacity(0.09)))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 7, style: .continuous)
-                            .strokeBorder(isRecording ? Color.accentColor.opacity(0.7) : .clear, lineWidth: 1)
+                            .strokeBorder(isRecording ? AnyShapeStyle(TintShapeStyle().opacity(0.7)) : AnyShapeStyle(.clear), lineWidth: 1)
                     )
                     .contentShape(Rectangle())
             }

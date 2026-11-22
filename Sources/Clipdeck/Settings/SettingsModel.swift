@@ -45,6 +45,21 @@ final class SettingsModel {
         didSet { preferences.ignoredBundleIDs = ignoredBundleIDs }
     }
 
+    var appearance: PanelAppearance {
+        didSet {
+            preferences.appearance = appearance
+            Self.apply(appearance)
+        }
+    }
+
+    var theme: PanelTheme {
+        didSet { preferences.theme = theme }
+    }
+
+    var glass: Double {
+        didSet { preferences.glass = glass }
+    }
+
     private(set) var launchAtLogin = false
     private(set) var launchAtLoginMessage: String?
     private(set) var accessibilityTrusted = false
@@ -59,7 +74,19 @@ final class SettingsModel {
         pasteDirectly = preferences.pasteDirectly
         isPaused = preferences.isPaused
         ignoredBundleIDs = preferences.ignoredBundleIDs
+        appearance = preferences.appearance
+        theme = preferences.theme
+        glass = preferences.glass
+        Self.apply(appearance)
         refreshStatus()
+    }
+
+    private static func apply(_ appearance: PanelAppearance) {
+        NSApp?.appearance = switch appearance {
+        case .system: nil
+        case .light: NSAppearance(named: .aqua)
+        case .dark: NSAppearance(named: .darkAqua)
+        }
     }
 
     func setRecordingShortcut(_ isRecording: Bool) {

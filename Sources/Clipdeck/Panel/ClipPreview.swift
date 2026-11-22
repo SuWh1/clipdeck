@@ -29,9 +29,9 @@ private struct LinkPreview: View {
         HStack(spacing: 10) {
             Image(systemName: "link")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(.tint)
                 .frame(width: 28, height: 28)
-                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.accentColor.opacity(0.14)))
+                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(TintShapeStyle().opacity(0.14)))
             VStack(alignment: .leading, spacing: 2) {
                 Text(host).font(.system(size: 13, weight: .semibold)).lineLimit(1)
                 Text(address)

@@ -27,7 +27,7 @@ struct ClipRowView: View {
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(shape.fill(background))
-        .overlay(shape.strokeBorder(isSelected ? Color.accentColor.opacity(0.55) : .clear, lineWidth: 1))
+        .overlay(shape.strokeBorder(isSelected ? AnyShapeStyle(TintShapeStyle().opacity(0.55)) : AnyShapeStyle(.clear), lineWidth: 1))
         .contentShape(shape)
         .onHover { isHovered = $0 }
         .onTapGesture(perform: actions.paste)
@@ -47,9 +47,9 @@ struct ClipRowView: View {
         .accessibilityAction(named: "Paste", actions.paste)
     }
 
-    private var background: Color {
-        if isSelected { return Color.accentColor.opacity(0.18) }
-        return Color.primary.opacity(isHovered ? 0.09 : 0.045)
+    private var background: AnyShapeStyle {
+        if isSelected { return AnyShapeStyle(TintShapeStyle().opacity(0.18)) }
+        return AnyShapeStyle(.primary.opacity(isHovered ? 0.09 : 0.045))
     }
 
     private var meta: some View {
@@ -69,7 +69,7 @@ struct ClipRowView: View {
             if item.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.system(size: 9))
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(.tint)
                     .accessibilityLabel("Pinned")
             }
             if let shortcutNumber {

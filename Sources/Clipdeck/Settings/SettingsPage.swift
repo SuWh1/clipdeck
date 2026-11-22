@@ -14,6 +14,7 @@ struct SettingsPage: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     shortcutSection
+                    AppearanceSection(settings: settings)
                     generalSection
                     IgnoredAppsSection(settings: settings, actions: actions)
                     historySection
@@ -247,7 +248,7 @@ private struct IgnoredAppsSection: View {
             Button(action: chooseApp) {
                 Label("Add App…", systemImage: "plus")
                     .font(.system(size: 13))
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(.tint)
                     .frame(maxWidth: .infinity, minHeight: 36, alignment: .leading)
                     .padding(.horizontal, 12)
                     .contentShape(Rectangle())

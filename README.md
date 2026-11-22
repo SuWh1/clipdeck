@@ -31,6 +31,7 @@ It is a small, native macOS app written in Swift (AppKit and SwiftUI). It uses l
 - **Instant search** that ignores case and accents and works in any language.
 - **Filters**: All, Text, Images, Links, Files and Pinned.
 - **Paste anywhere**: pick an item and it is pasted into the app you were using. ⇧↩ pastes as plain text, and ⌘1 to ⌘9 paste the first nine items.
+- **Your look**: Auto, Light or Dark, eight accent colors, and a transparency slider from solid to glass.
 - **Pins** keep an item forever.
 - **Private by design**: copies from password managers are never saved, and you can add any app to an ignore list.
 - **History length** of a day, a week, a month (the default), 3 months, a year or forever.

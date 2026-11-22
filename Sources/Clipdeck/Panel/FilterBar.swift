@@ -51,7 +51,7 @@ private struct FilterChip: View {
     }
 
     private var background: AnyShapeStyle {
-        if isSelected { return AnyShapeStyle(Color.accentColor) }
+        if isSelected { return AnyShapeStyle(.tint) }
         return AnyShapeStyle(.primary.opacity(isHovered ? 0.12 : 0.06))
     }
 }
