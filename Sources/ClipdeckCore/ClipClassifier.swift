@@ -35,14 +35,16 @@ public struct ClipClassifier: Sendable {
 
     public func classify(_ snapshot: PasteboardSnapshot, source: ClipSource?) -> ClipCandidate? {
         guard !snapshot.types.isEmpty, !isPrivate(snapshot, source: source) else { return nil }
+        if let file = snapshot.fileURLs.first, snapshot.fileURLs.count == 1, let image = imagePayload(fromFile: file) {
+            return ClipCandidate(kind: .image, text: "", image: image, source: source)
+        }
         if !snapshot.fileURLs.isEmpty {
             return ClipCandidate(kind: .file, text: snapshot.fileURLs.map(\.path).joined(separator: "\n"), source: source)
         }
         let text = snapshot.string ?? snapshot.urlString
         let hasText = !PasteboardSnapshot.isBlank(text)
         if let data = snapshot.imageData, !hasText || PasteboardSnapshot.imageComesFirst(snapshot.types),
-           data.count <= maxImageBytes * Self.rawImageAllowance,
-           let image = ImageEncoding.payload(from: data, maxPixels: maxImagePixels), image.png.count <= maxImageBytes {
+           let image = imagePayload(from: data) {
             return ClipCandidate(kind: .image, text: "", image: image, source: source)
         }
         guard let text, hasText, text.utf8.count <= maxTextBytes else { return nil }
@@ -58,6 +60,27 @@ public struct ClipClassifier: Sendable {
         guard !text.contains(where: \.isWhitespace), let url = URL(string: text),
               let scheme = url.scheme?.lowercased(), linkSchemes.contains(scheme) else { return false }
         return !(url.host ?? "").isEmpty
+    }
+
+    private func imagePayload(from data: Data) -> ImagePayload? {
+        guard data.count <= maxImageBytes * Self.rawImageAllowance,
+              let image = ImageEncoding.payload(from: data, maxPixels: maxImagePixels), image.png.count <= maxImageBytes
+        else { return nil }
+        return image
+    }
+
+    private func imagePayload(fromFile url: URL) -> ImagePayload? {
+        // Telegram copies a .jpg link that points to an extensionless file in its cache.
+        let target = url.resolvingSymlinksInPath()
+        let limit = maxImageBytes * Self.rawImageAllowance
+        let keys: Set<URLResourceKey> = [.isRegularFileKey, .volumeIsLocalKey, .fileSizeKey, .ubiquitousItemDownloadingStatusKey]
+        guard [url, target].contains(where: { UTType(filenameExtension: $0.pathExtension)?.conforms(to: .image) == true }),
+              let values = try? target.resourceValues(forKeys: keys),
+              values.isRegularFile == true, values.volumeIsLocal == true, (values.fileSize ?? .max) <= limit,
+              (values.ubiquitousItemDownloadingStatus ?? .current) == .current,
+              let data = try? FileHandle(forReadingFrom: target).read(upToCount: limit + 1)
+        else { return nil }
+        return imagePayload(from: data)
     }
 
     private func isPrivate(_ snapshot: PasteboardSnapshot, source: ClipSource?) -> Bool {

@@ -98,6 +98,70 @@ struct ClipClassifierTests {
         #expect(result?.filePaths == ["/tmp/a.txt", "/tmp/b c.png"])
     }
 
+    @Test("should save a single copied image file as an image")
+    func imageFile() throws {
+        let url = makeTempDirectory().appendingPathComponent("photo.png")
+        try TestImages.png(width: 6, height: 2).write(to: url)
+        let result = classifier.classify(snapshot(types: ["public.file-url"], files: [url]), source: source)
+        #expect(result?.kind == .image)
+        #expect(result?.text == "")
+        #expect(result?.image?.width == 6)
+        #expect(result?.image?.png == TestImages.png(width: 6, height: 2))
+    }
+
+    @Test("should read an image file through a link to a file without an extension")
+    func linkedImageFile() throws {
+        let directory = makeTempDirectory()
+        let target = directory.appendingPathComponent("cache-entry")
+        let link = directory.appendingPathComponent("photo.jpg")
+        try TestImages.png().write(to: target)
+        try FileManager.default.createSymbolicLink(at: link, withDestinationURL: target)
+        let result = classifier.classify(snapshot(types: ["public.file-url"], files: [link]), source: source)
+        #expect(result?.kind == .image)
+    }
+
+    @Test("should save an image file and the same copied picture as one clip")
+    func imageFileMatchesPicture() throws {
+        let url = makeTempDirectory().appendingPathComponent("photo.png")
+        try TestImages.png().write(to: url)
+        let fromFile = classifier.classify(snapshot(types: ["public.file-url"], files: [url]), source: source)
+        let fromPicture = classifier.classify(snapshot(types: ["public.png"], image: TestImages.png()), source: source)
+        #expect(fromFile?.contentHash == fromPicture?.contentHash)
+    }
+
+    @Test("should keep a folder or a pipe named like an image as a file", .timeLimit(.minutes(1)))
+    func specialFileNamedLikeImage() throws {
+        let directory = makeTempDirectory()
+        let folder = directory.appendingPathComponent("album.png")
+        let pipe = directory.appendingPathComponent("stream.png")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: false)
+        #expect(mkfifo(pipe.path, 0o600) == 0)
+        for url in [folder, pipe] {
+            #expect(classifier.classify(snapshot(types: ["public.file-url"], files: [url]), source: source)?.kind == .file)
+        }
+    }
+
+    @Test("should keep a copied file as a file when it is not a readable image", arguments: [
+        "notes.txt", "missing.png", "broken.png",
+    ])
+    func notImageFile(name: String) throws {
+        let url = makeTempDirectory().appendingPathComponent(name)
+        if name != "missing.png" {
+            try Data("not an image".utf8).write(to: url)
+        }
+        let result = classifier.classify(snapshot(types: ["public.file-url"], files: [url]), source: source)
+        #expect(result?.kind == .file)
+        #expect(result?.text == url.path)
+    }
+
+    @Test("should keep an image file over the size limit as a file")
+    func largeImageFile() throws {
+        let url = makeTempDirectory().appendingPathComponent("photo.png")
+        try TestImages.png().write(to: url)
+        let small = ClipClassifier(ignoredBundleIDs: [], maxImageBytes: 10)
+        #expect(small.classify(snapshot(types: ["public.file-url"], files: [url]), source: source)?.kind == .file)
+    }
+
     @Test("should classify an image-only copy as an image with png data and size")
     func imageOnly() {
         let result = classifier.classify(snapshot(types: ["public.tiff"], image: TestImages.tiff(width: 5, height: 2)), source: source)

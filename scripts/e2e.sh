@@ -60,6 +60,9 @@ IMAGE_FILE="$(query "SELECT imageFile FROM clips WHERE kind='image' AND imageWid
 [[ -f "$DATA/images/$IMAGE_FILE" ]] || fail "the image file was not written"
 echo "ok   the image file is on disk"
 
+osascript -e "set the clipboard to (POSIX file \"$WORK/image.png\")"
+expect "a copied image file is saved as the same image" "SELECT COUNT(*) || '/' || MAX(copyCount) FROM clips WHERE kind='image' AND imageWidth=64" "1/2"
+
 echo "report" > "$WORK/report-$MARK.txt"
 osascript -e "set the clipboard to (POSIX file \"$WORK/report-$MARK.txt\")"
 expect "a copied file is saved as a file" "SELECT COUNT(*) FROM clips WHERE kind='file' AND text LIKE '%report-$MARK.txt'" 1
