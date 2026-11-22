@@ -8,8 +8,11 @@ final class StatusItemController: NSObject {
     var onTogglePause: (() -> Void)?
     var currentShortcut: (() -> KeyShortcut)?
 
+    private static let savedAnimationDuration: TimeInterval = 0.6
+
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
     private var isPaused = false
+    private var animation: Timer?
 
     override init() {
         super.init()
@@ -28,18 +31,47 @@ final class StatusItemController: NSObject {
         item.button?.setAccessibilityLabel(paused ? "Clipdeck, recording paused" : "Clipdeck")
     }
 
-    static func makeIcon() -> NSImage {
+    func playSavedAnimation() {
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion, animation?.isValid != true else { return }
+        let start = Date()
+        let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] timer in
+            let finished = MainActor.assumeIsolated { () -> Bool in
+                let progress = min(Date().timeIntervalSince(start) / Self.savedAnimationDuration, 1)
+                self?.item.button?.image = Self.makeIcon(progress: progress)
+                return progress >= 1
+            }
+            if finished { timer.invalidate() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        animation = timer
+    }
+
+    /// At progress 0 the old card is alone in front; it slides back as a new card pops in on top.
+    static func makeIcon(progress: CGFloat = 1) -> NSImage {
+        let slide = easeOut(min(progress / 0.55, 1))
+        let pop = min(max((progress - 0.2) / 0.8, 0), 1)
         let image = NSImage(size: NSSize(width: 18, height: 14), flipped: false) { _ in
             let front = NSRect(x: 0, y: 0, width: 15.6, height: 11)
-            NSColor.black.withAlphaComponent(0.4).setFill()
-            NSBezierPath(roundedRect: front.offsetBy(dx: 2.4, dy: 3), xRadius: 2.2, yRadius: 2.2).fill()
-            NSColor.black.setFill()
-            NSBezierPath(roundedRect: front, xRadius: 2.2, yRadius: 2.2).fill()
+            NSColor.black.withAlphaComponent(1 - 0.6 * slide).setFill()
+            NSBezierPath(roundedRect: front.offsetBy(dx: 2.4 * slide, dy: 3 * slide), xRadius: 2.2, yRadius: 2.2).fill()
+            let scale = 0.5 + 0.5 * backOut(pop)
+            let card = front.insetBy(dx: front.width * (1 - scale) / 2, dy: front.height * (1 - scale) / 2)
+            NSColor.black.withAlphaComponent(min(pop * 3, 1)).setFill()
+            NSBezierPath(roundedRect: card, xRadius: 2.2 * scale, yRadius: 2.2 * scale).fill()
             return true
         }
         image.isTemplate = true
         image.accessibilityDescription = "Clipdeck"
         return image
+    }
+
+    private static func easeOut(_ t: CGFloat) -> CGFloat {
+        1 - pow(1 - t, 3)
+    }
+
+    private static func backOut(_ t: CGFloat) -> CGFloat {
+        let overshoot: CGFloat = 0.8
+        return 1 + (overshoot + 1) * pow(t - 1, 3) + overshoot * pow(t - 1, 2)
     }
 
     @objc private func buttonClicked() {

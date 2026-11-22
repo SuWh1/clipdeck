@@ -57,7 +57,10 @@ final class AppController {
     }
 
     private func wireCallbacks() {
-        watcher.onRecorded = { [weak self] in self?.historyChanged() }
+        watcher.onRecorded = { [weak self] in
+            self?.historyChanged()
+            self?.statusItem.playSavedAnimation()
+        }
         hotKeys.onPress = { [weak self] in self?.panel.toggle() }
         panel.onPaste = { [weak self] item, mode, target in self?.paste(item, mode: mode, target: target) }
         statusItem.onToggle = { [weak self] in self?.panel.toggle(fromStatusItem: true) }
