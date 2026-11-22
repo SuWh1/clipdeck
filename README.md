@@ -123,6 +123,8 @@ The second line deletes your clipboard history too.
 
 **Pasting does not work.** Clipdeck needs Accessibility access. See [Set up](#set-up). After an update, remove Clipdeck from the Accessibility list and allow it again.
 
+**Photos copied in Telegram show up as files.** Telegram copies a link to a file in its own folder, and macOS keeps other apps out of that folder. To save these photos as images, turn on Clipdeck in **System Settings › Privacy & Security › Full Disk Access**.
+
 **My shortcut does nothing.** Another app may use the same shortcut. Pick a different one in Settings.
 
 **How much history does it keep?** A month by default. "Forever" keeps up to 10,000 items. Pinned items are always kept.
