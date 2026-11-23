@@ -36,7 +36,7 @@ It is a small, native macOS app written in Swift (AppKit and SwiftUI). It uses l
 - **Private by design**: copies from password managers are never saved, and you can add any app to an ignore list.
 - **History length** of a day, a week, a month (the default), 3 months, a year or forever.
 - **PasteNow import**: bring your old history with you.
-- **Menu bar app**: it starts at login and has no Dock icon. You can drag the panel anywhere, and it remembers where you put it.
+- **Menu bar app**: it starts at login and has no Dock icon. The panel opens on the screen your mouse is on. You can drag it anywhere, and it opens in that spot on every screen.
 
 ## Install
 

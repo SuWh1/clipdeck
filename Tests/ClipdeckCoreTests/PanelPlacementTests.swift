@@ -35,6 +35,30 @@ struct PanelPlacementTests {
         #expect(frame.minY == laptop.minY)
     }
 
+    @Test("should open at the same spot on the screen with the mouse")
+    func sameSpotOtherScreen() {
+        let frame = PanelPlacement.frame(size: size, savedTopLeft: CGPoint(x: 553, y: 890), screens: [laptop, external], mouseScreen: external)
+        #expect(frame == CGRect(x: 1470 + 1098, y: 1400 - 660, width: 364, height: 660))
+    }
+
+    @Test("should keep a panel dragged to a corner in that corner on a smaller screen")
+    func cornerOnSmallerScreen() {
+        let frame = PanelPlacement.frame(size: size, savedTopLeft: CGPoint(x: 1470, y: 660), screens: [laptop, external], mouseScreen: laptop)
+        #expect(frame == CGRect(x: 0, y: 0, width: 364, height: 660))
+    }
+
+    @Test("should read a spot near the edge between two screens from the screen it is on")
+    func spotNearScreenEdge() {
+        let frame = PanelPlacement.frame(size: size, savedTopLeft: CGPoint(x: 1480, y: 880), screens: [laptop, external], mouseScreen: external)
+        #expect(frame == CGRect(x: 1480, y: 880 - 660, width: 364, height: 660))
+    }
+
+    @Test("should use the screen that holds most of the panel")
+    func screenWithMostOfPanel() {
+        let frame = PanelPlacement.frame(size: size, savedTopLeft: CGPoint(x: 1460, y: 880), screens: [laptop, external], mouseScreen: external)
+        #expect(frame == CGRect(x: 1470, y: 880 - 660, width: 364, height: 660))
+    }
+
     @Test("should go back to the top right when the saved spot is on a screen that is gone")
     func missingScreen() {
         let frame = PanelPlacement.frame(size: size, savedTopLeft: CGPoint(x: 3000, y: 1200), screens: [laptop], mouseScreen: laptop)
